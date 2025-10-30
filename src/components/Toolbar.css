@@ -1,0 +1,119 @@
+.toolbar-container {
+  width: 160px;
+  /* Fixed width for the vertical toolbar */
+  height: 100%;
+  /* Take full (padded) height */
+  flex-shrink: 0;
+  /* Don't shrink */
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  /* Align items to the top */
+
+  padding: 20px 15px;
+  gap: 30px;
+  /* Space between sections */
+
+  background-color: #ffffff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  overflow-y: auto;
+  /* Add scrollbar if screen is too short */
+}
+
+.toolbar-section {
+  display: flex;
+  flex-direction: column;
+  /* Stack controls vertically */
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.toolbar-section label {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: #333;
+}
+
+.toolbar-button {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.toolbar-button:hover {
+  background-color: #e0e0e0;
+}
+
+.toolbar-button.active {
+  background-color: #007aff;
+  color: white;
+  border-color: #007aff;
+  box-shadow: 0 0 5px rgba(0, 122, 255, 0.5);
+}
+
+.toolbar-button.action {
+  background-color: #ff3b30;
+  color: white;
+  border-color: #ff3b30;
+}
+
+.toolbar-button.action:hover {
+  background-color: #d93025;
+}
+
+.toolbar-button.pass-turn {
+  background-color: #34c759;
+  /* Green */
+  color: white;
+  border-color: #34c759;
+}
+
+.toolbar-button.pass-turn:hover {
+  background-color: #2ca349;
+}
+
+input[type='color'] {
+  width: 50px;
+  height: 30px;
+  border: 1px solid #ccc;
+  padding: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+input[type='range'] {
+  width: 100%;
+  cursor: pointer;
+}
+
+/* Disabled Styles */
+.toolbar-button:disabled,
+input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f0f0f0;
+}
+
+.toolbar-button.active:disabled {
+  background-color: #007aff;
+  opacity: 0.5;
+}
+
+label:has(+ input:disabled) {
+  color: #999;
+}
