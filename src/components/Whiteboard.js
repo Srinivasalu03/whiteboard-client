@@ -10,12 +10,8 @@ function Whiteboard({ room, color, lineWidth, isMyTurn }) {
   // Setup canvas
   useEffect(() => {
     const canvas = canvasRef.current;
-    // --- THIS IS THE FIX ---
-    // We use a fixed-size canvas. It will not resize and
-    // will not be cleared when the window is maximized.
     canvas.width = 800;
     canvas.height = 600;
-    // --- END FIX ---
     const context = canvas.getContext('2d');
     context.lineCap = 'round';
     contextRef.current = context;
@@ -29,7 +25,7 @@ function Whiteboard({ room, color, lineWidth, isMyTurn }) {
     }
   }, [color, lineWidth]); // Re-runs when color or lineWidth changes
 
-  // Setup socket listeners (no change here, all listeners are always on)
+  // Setup socket listeners
   useEffect(() => {
     const onStartDrawing = ({ x, y, color: receivedColor, lineWidth: receivedLineWidth }) => {
       console.log('[CLIENT] Receiving: server-start-drawing');
@@ -73,11 +69,9 @@ function Whiteboard({ room, color, lineWidth, isMyTurn }) {
     };
   }, []);
 
-  // --- MODIFIED: Add 'isMyTurn' check ---
+  // --- MOUSE HANDLERS (No Change) ---
   const startDrawing = ({ nativeEvent }) => {
-    // Block drawing if it's not our turn
     if (!isMyTurn) return;
-
     const { offsetX, offsetY } = nativeEvent;
     contextRef.current.beginPath();
     contextRef.current.moveTo(offsetX, offsetY);
@@ -85,58 +79,75 @@ function Whiteboard({ room, color, lineWidth, isMyTurn }) {
 
     console.log('[CLIENT] Emitting: start-drawing');
     socket.emit('start-drawing', {
-      x: offsetX,
-      y: offsetY,
-      room: room,
-      color: color,
-      lineWidth: lineWidth
+      x: offsetX, y: offsetY, room, color, lineWidth
     });
   };
 
   const finishDrawing = () => {
-    // No 'isMyTurn' check here, because 'isDrawing' will be false
-    // if startDrawing was blocked.
     if (!isDrawing) return;
-
     contextRef.current.closePath();
     setIsDrawing(false);
-
-    console.log('[CLIENT] Emitting: finish-drawing');
-    socket.emit('finish-drawing', { room: room });
+    console.log('[CLIENT] Emitting: finish-drawing', { room });
   };
 
   const draw = ({ nativeEvent }) => {
-    // Block drawing if it's not our turn OR if not drawing
-    if (!isDrawing || !isMyTurn) {
-      return;
-    }
+    if (!isDrawing || !isMyTurn) return;
     const { offsetX, offsetY } = nativeEvent;
     contextRef.current.lineTo(offsetX, offsetY);
     contextRef.current.stroke();
-
     socket.emit('drawing', {
-      x: offsetX,
-      y: offsetY,
-      room: room,
-      color: color,
-      lineWidth: lineWidth
+      x: offsetX, y: offsetY, room, color, lineWidth
     });
   };
+
+  // --- NEW TOUCH HANDLERS ---
+  const getTouchCoords = (e) => {
+    const touch = e.touches[0];
+    const { left, top } = canvasRef.current.getBoundingClientRect();
+    const offsetX = touch.clientX - left;
+    const offsetY = touch.clientY - top;
+    return { offsetX, offsetY };
+  };
+
+  const handleTouchStart = (e) => {
+    // Prevent screen scrolling while drawing
+    e.preventDefault();
+    if (!isMyTurn) return;
+    const { offsetX, offsetY } = getTouchCoords(e);
+    startDrawing({ nativeEvent: { offsetX, offsetY } });
+  };
+
+  const handleTouchMove = (e) => {
+    e.preventDefault();
+    if (!isDrawing || !isMyTurn) return;
+    const { offsetX, offsetY } = getTouchCoords(e);
+    draw({ nativeEvent: { offsetX, offsetY } });
+  };
+
+  const handleTouchEnd = (e) => {
+    e.preventDefault();
+    if (!isDrawing) return;
+    finishDrawing();
+  };
+  // --- END NEW TOUCH HANDLERS ---
 
   return (
     <div className="whiteboard-container">
       <canvas
-        // --- NEW: Add 'disabled' class based on turn ---
         className={!isMyTurn ? 'disabled' : ''}
         ref={canvasRef}
+        // Mouse Events
         onMouseDown={startDrawing}
         onMouseUp={finishDrawing}
         onMouseMove={draw}
         onMouseLeave={finishDrawing}
+        // NEW Touch Events
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchMove}
       />
     </div>
   );
 }
 
 export default Whiteboard;
-

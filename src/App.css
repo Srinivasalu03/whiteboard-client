@@ -11,7 +11,7 @@ body {
   background-color: #f0f0f0;
   /* Light gray background for the whole page */
   overflow: hidden;
-  /* Prevent scrolling */
+  /* Prevent scrolling on the body */
 }
 
 /* This is the main container for the toolbar + whiteboard */
@@ -33,6 +33,8 @@ body {
   align-items: center;
   padding: 20px;
   height: 100%;
+  overflow: auto;
+  /* <-- THIS IS THE FIX FOR MOBILE */
 }
 
 /* The fixed-size canvas */
@@ -42,6 +44,8 @@ canvas {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: cursor 0.2s, border-color 0.2s;
+  /* Add this to prevent callouts/menus on long-press */
+  touch-action: none;
 }
 
 canvas.disabled {
